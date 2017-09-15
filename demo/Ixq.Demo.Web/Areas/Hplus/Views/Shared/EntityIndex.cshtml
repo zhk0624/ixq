@@ -130,7 +130,6 @@
                 resize: true,
                 content: '@Url.Action(Model.PageConfig.DetailAction)/'+id
             });
-            //window.location.href='@Url.Action(Model.PageConfig.DetailAction)/'+id;
         };
         function Edit@(Model.EntityType.Name)(id) {
             layer.open({
@@ -151,6 +150,9 @@
             }, function(){
                 return;
             });
+        }
+        function reloadData() {
+            $("#@tableId").trigger("reloadGrid");
         }
     </script>
     @RenderSection("pageScripts", false)

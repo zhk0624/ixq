@@ -13,22 +13,8 @@
     <div class="row">
         <div class="col-sm-12">
             <div class="ibox float-e-margins">
-                @*<div class="ibox-title">
-                    <h5>@(Model.Title)</h5>
-                </div>*@
-                <div class="ibox-content">
-                    <form class="form-horizontal m-t" method="post" id="@(entityName)_from">
-                        @Html.AntiForgeryToken()
-                        @foreach (IEntityPropertyMetadata item in Model.PropertyMenberInfo)
-                        {
-                            @Html.PropertyEditor(item, Model.EntityDto)
-                        }
-                        <div class="form-group">
-                            <div class="col-sm-4 col-sm-offset-3">
-                                <button class="btn btn-primary" type="submit">提交</button>
-                            </div>
-                        </div>
-                    </form>
+                <div class="ibox-content" id="from-container">
+                    @Html.Partial("_Form", Model)
                 </div>
             </div>
         </div>
@@ -37,10 +23,36 @@
 @section scripts{
     <script src="~/Content/Hplus/js/plugins/validate/jquery.validate.min.js"></script>
     <script src="~/Content/Hplus/js/plugins/validate/messages_zh.min.js"></script>
+    <script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+    <script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
     @Html.RenderScripts()
     <script>
+        var parentIndex = parent.layer.getFrameIndex(window.name); //获取窗口索引
         $().ready(function() {
             $("#@(entityName)_from").validate();
         });
+        function onSuccess(html, state, xhr) {
+            layer.open({
+                btn:['关闭'],
+                type: 0,
+                content: '提交成功',
+                yes: function (index, el) {
+                    parent.reloadData();
+                    layer.close(index);
+                    parent.layer.close(parentIndex); // 关闭iframe
+                }
+            });
+        }
+        function onFailure(xhr, state) {
+            if (xhr.responseJSON && xhr.responseJSON.message) {
+                layer.open({
+                    type: 0,
+                    content: xhr.responseJSON.message
+                });
+            }
+            else {
+                $('#from-container').html(xhr.responseText);
+            }
+        }
     </script>
 }

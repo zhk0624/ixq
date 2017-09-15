@@ -13,12 +13,12 @@ namespace Ixq.Demo.Domain.ApplicationService
     public class ProductTypeService : EntityService<ProductType, ProductTypeDot, Guid>, IProductTypeService
     {
         public ProductTypeService(IRepositoryBase<ProductType, Guid> repository, RequestContext requestContxt,
-            IEntityControllerData entityControllerData) :
+            IEntityControllerDescriptor entityControllerData) :
                 base(repository, requestContxt, entityControllerData)
         {
         }
 
-        public override IQueryable<ProductType> Query()
+        public override IQueryable<ProductType> GetEntityData()
         {
             return Repository.GetAllInclude(x => x.ParentType);
         }

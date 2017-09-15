@@ -11,6 +11,7 @@ using Ixq.UI;
 using Ixq.UI.ComponentModel.DataAnnotations;
 using Ixq.UI.Controls;
 using Newtonsoft.Json;
+using System.Linq;
 
 namespace Ixq.Web.Mvc
 {
@@ -20,7 +21,7 @@ namespace Ixq.Web.Mvc
     /// <typeparam name="TEntity">实体。</typeparam>
     /// <typeparam name="TDto">数据传输对象。</typeparam>
     /// <typeparam name="TKey">实体主键类型。</typeparam>
-    public abstract class EntityController<TEntity, TDto, TKey> : BaseController, IEntityControllerData
+    public abstract class EntityController<TEntity, TDto, TKey> : BaseController, IEntityControllerDescriptor
         where TEntity : class, IEntity<TKey>, new()
         where TDto : class, IDto<TEntity, TKey>, new()
     {
@@ -177,18 +178,19 @@ namespace Ixq.Web.Mvc
         [HttpPost]
         [ValidateInput(true)]
         [ValidateAntiForgeryToken]
-        public virtual async Task<ActionResult> Edit(TDto model)
+        public virtual async Task<ActionResult> Edit([ModelBinder(typeof(EntityModelBinder))]TDto model)
         {
-            var a = this.Request["TestEnum2"];
+            var viewModel = await EntityServicer.CreateEditModelAsync(model);
             if (ModelState.IsValid)
             {
-                var res = await EntityServicer.UpdateEntity(model.MapTo());
-                return Json("");
+                await EntityServicer.UpdateEntity(model.MapTo());
+                return PartialView("_Form", viewModel);
             }
             else
             {
-                var editModel = await EntityServicer.CreateEditModelAsync(model);
-                return View(editModel);
+                Response.StatusCode = 500;
+                Response.TrySkipIisCustomErrors = true;
+                return PartialView("_Form", viewModel);
             }
         }
 
@@ -225,11 +227,17 @@ namespace Ixq.Web.Mvc
             return View();
         }
 
+        /// <summary>
+        ///     对调用构造函数时可能不可用的数据进行初始化。
+        /// </summary>
+        /// <param name="requestContext">HTTP 上下文和路由数据。</param>
         protected override void Initialize(RequestContext requestContext)
         {
             base.Initialize(requestContext);
             EntityServicer = new EntityService<TEntity, TDto, TKey>(Repository, requestContext, this);
         }
+
+        #region JsonResult
 
         /// <summary>
         ///     创建一个<see cref="JsonReader" />对象，将指定的对象序列化为JavaScript Object Notation（JSON）。
@@ -290,6 +298,23 @@ namespace Ixq.Web.Mvc
                 SerializerSettings = serializerSettings
             };
         }
+
+        #endregion
+
+        #region ModelErrorResult
+
+        /// <summary>
+        ///     创建一个 <see cref="ModelErrorResult"/> 对象，将模型错误信息序列化成Json对象。
+        /// </summary>
+        /// <param name="modelState"></param>
+        /// <returns></returns>
+        protected virtual ModelErrorResult ModelError(ModelStateDictionary modelState)
+        {
+            return new ModelErrorResult(modelState);
+        }
+
+        #endregion
+
 
         /// <summary>
         ///     创建实体元数据提供者，默认提供<see cref="Ixq.Web.Mvc.EntityMetadataProvider" />。可在派生类中重写。

@@ -7,6 +7,9 @@ namespace Ixq.Demo.Web
         // 有关绑定的详细信息，请访问 http://go.microsoft.com/fwlink/?LinkId=301862
         public static void RegisterBundles(BundleCollection bundles)
         {
+            // 关闭压缩
+            BundleTable.EnableOptimizations = false;
+
             bundles.Add(new ScriptBundle("~/bundles/jquery").Include(
                 "~/Scripts/jquery-{version}.js"));
 
@@ -40,7 +43,7 @@ namespace Ixq.Demo.Web
                 "~/Content/Hplus/js/bootstrap.min.js",
                 "~/Content/Hplus/js/plugins/metisMenu/jquery.metisMenu.js",
                 "~/Content/Hplus/js/plugins/slimscroll/jquery.slimscroll.min.js",
-                "~/Content/Hplus/js/plugins/layer/layer.min.js",
+                "~/Content/Hplus/js/plugins/layer/layer.js",
                 "~/Content/Hplus/js/hplus.js",
                 "~/Content/Hplus/js/contabs.js",
                 "~/Content/Hplus/js/plugins/pace/pace.min.js"
@@ -48,7 +51,7 @@ namespace Ixq.Demo.Web
             bundles.Add(new ScriptBundle("~/js/phlus/iframe").Include(
                 "~/Content/Hplus/js/jquery.min.js",
                 "~/Content/Hplus/js/bootstrap.min.js",
-                "~/Content/Hplus/js/plugins/layer/layer.min.js",
+                "~/Content/Hplus/js/plugins/layer/layer.js",
                 "~/Content/Hplus/js/content.js"));
         }
     }

@@ -13,7 +13,9 @@ namespace ixq.Demo.DbContext
     {
         public DataContext() : base("DataContext")
         {
+            this.Initialize();
             Configuration.ValidateOnSaveEnabled = false;
+            Configuration.LazyLoadingEnabled = false;
         }
 
         public static DataContext Create()
